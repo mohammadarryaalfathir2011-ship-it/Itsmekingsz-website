@@ -1,0 +1,3059 @@
+ <!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>My Store</title>
+
+    <style>
+        /* =====================================================
+           RESET
+        ===================================================== */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--background);
+            color: var(--text);
+            min-height: 100vh;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font-family: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+
+        /* =====================================================
+           VARIABLES
+        ===================================================== */
+
+        :root {
+            --primary: #1677ff;
+
+            --background: #f5f7fb;
+            --card: #ffffff;
+
+            --text: #111827;
+            --muted: #6b7280;
+
+            --border: #e5e7eb;
+
+            --danger: #ef4444;
+
+            --shadow:
+                0 8px 25px rgba(0, 0, 0, 0.05);
+        }
+
+
+        /* =====================================================
+           DARK MODE
+        ===================================================== */
+
+        body.dark {
+            --background: #0d0f12;
+            --card: #17191d;
+
+            --text: #ffffff;
+            --muted: #a5aab4;
+
+            --border: #292d34;
+
+            --shadow:
+                0 8px 25px rgba(0, 0, 0, 0.25);
+        }
+
+
+        /* =====================================================
+           TOPBAR
+        ===================================================== */
+
+        .topbar {
+            height: 65px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            position: sticky;
+            top: 0;
+
+            z-index: 100;
+
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+
+            transition: 0.3s;
+        }
+
+        .store-name {
+            font-size: 18px;
+            font-weight: 700;
+
+            max-width: 65%;
+
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .menu-button {
+            position: absolute;
+            left: 15px;
+
+            width: 42px;
+            height: 42px;
+
+            border: none;
+            border-radius: 10px;
+
+            background: transparent;
+            color: var(--text);
+
+            font-size: 25px;
+
+            transition: 0.2s;
+        }
+
+        .menu-button:hover {
+            background: var(--background);
+        }
+
+
+        /* =====================================================
+           SIDEBAR
+        ===================================================== */
+
+        .sidebar {
+            position: fixed;
+
+            top: 0;
+            left: -300px;
+
+            width: 285px;
+            height: 100vh;
+
+            padding: 20px;
+
+            background: var(--card);
+
+            border-right: 1px solid var(--border);
+
+            z-index: 1000;
+
+            transition: left 0.3s ease;
+
+            overflow-y: auto;
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            margin-bottom: 25px;
+        }
+
+        .sidebar-title {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .close-button {
+            width: 38px;
+            height: 38px;
+
+            border: none;
+            border-radius: 9px;
+
+            background: var(--background);
+            color: var(--text);
+
+            font-size: 23px;
+        }
+
+        .sidebar-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .sidebar-item {
+            width: 100%;
+
+            padding: 13px 14px;
+
+            border: none;
+            border-radius: 10px;
+
+            background: transparent;
+            color: var(--text);
+
+            text-align: left;
+
+            font-size: 14px;
+
+            transition: 0.2s;
+        }
+
+        .sidebar-item:hover {
+            background: var(--background);
+        }
+
+        .sidebar-item.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .theme-label {
+            margin-top: 22px;
+            margin-bottom: 8px;
+
+            color: var(--muted);
+
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .theme-button {
+            width: 100%;
+
+            padding: 11px;
+
+            margin-bottom: 7px;
+
+            border: 1px solid var(--border);
+            border-radius: 9px;
+
+            background: var(--background);
+            color: var(--text);
+
+            text-align: left;
+        }
+
+        .theme-button:hover {
+            border-color: var(--primary);
+        }
+
+        .sidebar-overlay {
+            display: none;
+
+            position: fixed;
+            inset: 0;
+
+            background: rgba(0, 0, 0, 0.5);
+
+            z-index: 900;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+
+        /* =====================================================
+           HOME
+        ===================================================== */
+
+        .home-page {
+            display: block;
+        }
+
+        .home-page.hidden {
+            display: none;
+        }
+
+        .home-container {
+            width: 100%;
+            max-width: 650px;
+
+            margin: 0 auto;
+
+            padding: 35px 18px 20px;
+        }
+
+
+        /* =====================================================
+           PROFILE
+        ===================================================== */
+
+        .profile {
+            text-align: center;
+        }
+
+        .profile-photo {
+            width: 110px;
+            height: 110px;
+
+            border-radius: 50%;
+
+            object-fit: cover;
+
+            border: 4px solid var(--primary);
+
+            margin-bottom: 13px;
+        }
+
+        .profile-name {
+            font-size: 24px;
+            font-weight: 700;
+
+            margin-bottom: 5px;
+        }
+
+        .profile-username {
+            color: var(--muted);
+
+            font-size: 14px;
+
+            margin-bottom: 12px;
+        }
+
+        .profile-bio {
+            max-width: 520px;
+
+            margin: 0 auto;
+
+            color: var(--muted);
+
+            font-size: 14px;
+
+            line-height: 1.6;
+        }
+
+
+        /* =====================================================
+           LINKS
+        ===================================================== */
+
+        .links-container {
+            margin-top: 30px;
+        }
+
+        .social-link {
+            display: flex;
+            align-items: center;
+
+            width: 100%;
+
+            min-height: 68px;
+
+            padding: 11px 13px;
+
+            margin-bottom: 12px;
+
+            border: 1px solid var(--border);
+            border-radius: 14px;
+
+            background: var(--card);
+
+            color: var(--text);
+
+            text-decoration: none;
+
+            box-shadow: var(--shadow);
+
+            transition:
+                transform 0.2s ease,
+                border-color 0.2s ease;
+        }
+
+        .social-link:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary);
+        }
+
+        .social-icon {
+            width: 46px;
+            height: 46px;
+
+            flex-shrink: 0;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 11px;
+
+            background: var(--background);
+
+            object-fit: cover;
+
+            font-size: 23px;
+        }
+
+        .social-content {
+            flex: 1;
+
+            min-width: 0;
+
+            margin-left: 13px;
+        }
+
+        .social-name {
+            font-size: 15px;
+            font-weight: 700;
+
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .social-description {
+            margin-top: 4px;
+
+            color: var(--muted);
+
+            font-size: 12px;
+        }
+
+        .social-arrow {
+            margin-left: 10px;
+
+            color: var(--muted);
+
+            font-size: 20px;
+        }
+
+
+        /* =====================================================
+           EMPTY LINK
+        ===================================================== */
+
+        .empty-links {
+            padding: 30px 10px;
+
+            text-align: center;
+
+            color: var(--muted);
+
+            font-size: 14px;
+        }
+
+
+        /* =====================================================
+           FOOTER
+        ===================================================== */
+
+        .footer {
+            padding: 25px 15px 30px;
+
+            text-align: center;
+
+            color: var(--muted);
+
+            font-size: 12px;
+        }
+
+
+        /* =====================================================
+           ADMIN PAGE
+        ===================================================== */
+
+        .admin-page {
+            display: none;
+        }
+
+        .admin-page.active {
+            display: block;
+        }
+
+
+        /* =====================================================
+           LOGIN
+        ===================================================== */
+
+        .login-container {
+            width: calc(100% - 30px);
+            max-width: 420px;
+
+            margin: 70px auto;
+
+            padding: 25px;
+
+            background: var(--card);
+
+            border: 1px solid var(--border);
+            border-radius: 16px;
+
+            box-shadow: var(--shadow);
+        }
+
+        .login-title {
+            margin-bottom: 7px;
+
+            font-size: 22px;
+        }
+
+        .login-description {
+            margin-bottom: 22px;
+
+            color: var(--muted);
+
+            font-size: 13px;
+
+            line-height: 1.5;
+        }
+
+
+        /* =====================================================
+           FORM
+        ===================================================== */
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+
+            margin-bottom: 7px;
+
+            color: var(--muted);
+
+            font-size: 13px;
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+
+            padding: 12px 13px;
+
+            border: 1px solid var(--border);
+            border-radius: 10px;
+
+            outline: none;
+
+            background: var(--background);
+            color: var(--text);
+
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            border-color: var(--primary);
+        }
+
+        .form-textarea {
+            min-height: 100px;
+
+            resize: vertical;
+        }
+
+        .form-help {
+            margin-top: 6px;
+
+            color: var(--muted);
+
+            font-size: 11px;
+        }
+
+
+        /* =====================================================
+           BUTTON
+        ===================================================== */
+
+        .button {
+            padding: 12px 16px;
+
+            border: none;
+            border-radius: 9px;
+
+            background: var(--primary);
+            color: white;
+
+            font-size: 14px;
+            font-weight: 600;
+
+            transition: opacity 0.2s;
+        }
+
+        .button:hover {
+            opacity: 0.9;
+        }
+
+        .button-secondary {
+            background: var(--background);
+
+            color: var(--text);
+
+            border: 1px solid var(--border);
+        }
+
+        .button-danger {
+            background: var(--danger);
+        }
+
+        .button-small {
+            padding: 9px 11px;
+
+            font-size: 12px;
+        }
+
+        .button-row {
+            display: flex;
+
+            gap: 8px;
+
+            flex-wrap: wrap;
+        }
+
+
+        /* =====================================================
+           LOGIN ERROR
+        ===================================================== */
+
+        .login-error {
+            margin-top: 12px;
+
+            color: var(--danger);
+
+            font-size: 13px;
+        }
+
+
+        /* =====================================================
+           ADMIN DASHBOARD
+        ===================================================== */
+
+        .dashboard {
+            width: 100%;
+            max-width: 900px;
+
+            margin: 0 auto;
+
+            padding: 28px 16px 50px;
+        }
+
+        .dashboard-title {
+            margin-bottom: 20px;
+
+            font-size: 24px;
+        }
+
+        .admin-card {
+            margin-bottom: 18px;
+
+            padding: 20px;
+
+            background: var(--card);
+
+            border: 1px solid var(--border);
+            border-radius: 15px;
+
+            box-shadow: var(--shadow);
+        }
+
+        .admin-card-title {
+            margin-bottom: 17px;
+
+            font-size: 17px;
+        }
+
+        .admin-card-description {
+            margin-bottom: 15px;
+
+            color: var(--muted);
+
+            font-size: 13px;
+
+            line-height: 1.5;
+        }
+
+
+        /* =====================================================
+           IMAGE PREVIEW
+        ===================================================== */
+
+        .profile-preview {
+            width: 95px;
+            height: 95px;
+
+            margin-bottom: 12px;
+
+            border-radius: 50%;
+
+            object-fit: cover;
+
+            border: 3px solid var(--primary);
+        }
+
+        .icon-preview {
+            width: 65px;
+            height: 65px;
+
+            margin-top: 5px;
+
+            border-radius: 11px;
+
+            object-fit: cover;
+
+            border: 1px solid var(--border);
+        }
+
+
+        /* =====================================================
+           COLOR
+        ===================================================== */
+
+        .color-control {
+            display: flex;
+            align-items: center;
+
+            gap: 12px;
+        }
+
+        .color-input {
+            width: 60px;
+            height: 42px;
+
+            padding: 2px;
+
+            border: 1px solid var(--border);
+            border-radius: 8px;
+
+            background: var(--background);
+        }
+
+
+        /* =====================================================
+           LINK ADMIN
+        ===================================================== */
+
+        .admin-links-list {
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 10px;
+        }
+
+        .admin-link {
+            display: flex;
+            align-items: center;
+
+            gap: 12px;
+
+            padding: 12px;
+
+            border: 1px solid var(--border);
+            border-radius: 12px;
+
+            background: var(--background);
+        }
+
+        .admin-link-icon {
+            width: 45px;
+            height: 45px;
+
+            flex-shrink: 0;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 10px;
+
+            background: var(--card);
+
+            object-fit: cover;
+
+            font-size: 21px;
+        }
+
+        .admin-link-content {
+            flex: 1;
+
+            min-width: 0;
+        }
+
+        .admin-link-name {
+            font-weight: 700;
+
+            font-size: 14px;
+        }
+
+        .admin-link-url {
+            margin-top: 4px;
+
+            color: var(--muted);
+
+            font-size: 11px;
+
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .admin-link-actions {
+            display: flex;
+
+            gap: 6px;
+        }
+
+
+        /* =====================================================
+           ADMIN NAVIGATION
+        ===================================================== */
+
+        .admin-nav {
+            display: flex;
+
+            gap: 7px;
+
+            margin-bottom: 20px;
+
+            overflow-x: auto;
+        }
+
+        .admin-nav-button {
+            padding: 10px 14px;
+
+            border: 1px solid var(--border);
+            border-radius: 9px;
+
+            background: var(--card);
+            color: var(--text);
+
+            white-space: nowrap;
+        }
+
+        .admin-nav-button.active {
+            background: var(--primary);
+            color: white;
+
+            border-color: var(--primary);
+        }
+
+
+        /* =====================================================
+           ADMIN SECTIONS
+        ===================================================== */
+
+        .admin-section {
+            display: none;
+        }
+
+        .admin-section.active {
+            display: block;
+        }
+
+
+        /* =====================================================
+           RESPONSIVE
+        ===================================================== */
+
+        @media (max-width: 600px) {
+
+            .home-container {
+                padding-top: 28px;
+            }
+
+            .profile-photo {
+                width: 100px;
+                height: 100px;
+            }
+
+            .profile-name {
+                font-size: 21px;
+            }
+
+            .admin-link {
+                align-items: flex-start;
+            }
+
+            .admin-link-actions {
+                flex-direction: column;
+            }
+
+            .dashboard {
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+        }
+    </style>
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    <div
+        class="sidebar-overlay"
+        id="sidebarOverlay"
+        onclick="closeSidebar()"
+    ></div>
+
+
+    <aside
+        class="sidebar"
+        id="sidebar"
+    >
+
+        <div class="sidebar-header">
+
+            <div class="sidebar-title">
+                Menu
+            </div>
+
+            <button
+                class="close-button"
+                onclick="closeSidebar()"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div class="sidebar-menu">
+
+            <button
+                class="sidebar-item active"
+                onclick="goHome()"
+            >
+                🏠 Menu Utama
+            </button>
+
+
+            <div class="theme-label">
+                TAMPILAN
+            </div>
+
+
+            <button
+                class="theme-button"
+                onclick="changeTheme('light')"
+            >
+                ☀️ Putih
+            </button>
+
+
+            <button
+                class="theme-button"
+                onclick="changeTheme('dark')"
+            >
+                🌙 Hitam
+            </button>
+
+
+            <button
+                class="theme-button"
+                onclick="changeTheme('auto')"
+            >
+                ⚙️ Otomatis
+            </button>
+
+
+            <br>
+
+
+            <button
+                class="sidebar-item"
+                onclick="openAdmin()"
+            >
+                🔐 Admin
+            </button>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         HOME PAGE
+    ====================================================== -->
+
+    <section
+        class="home-page"
+        id="homePage"
+    >
+
+        <header class="topbar">
+
+            <button
+                class="menu-button"
+                onclick="openSidebar()"
+                aria-label="Buka menu"
+            >
+                ☰
+            </button>
+
+
+            <div
+                class="store-name"
+                id="homeStoreName"
+            >
+                My Store
+            </div>
+
+        </header>
+
+
+        <main class="home-container">
+
+
+            <!-- PROFILE -->
+
+            <section class="profile">
+
+                <img
+                    class="profile-photo"
+                    id="homeProfilePhoto"
+                    src=""
+                    alt="Foto Profil"
+                >
+
+
+                <h1
+                    class="profile-name"
+                    id="homeProfileName"
+                >
+                    My Store
+                </h1>
+
+
+                <div
+                    class="profile-username"
+                    id="homeProfileUsername"
+                >
+                    @username
+                </div>
+
+
+                <p
+                    class="profile-bio"
+                    id="homeProfileBio"
+                >
+                    Selamat datang.
+                </p>
+
+            </section>
+
+
+            <!-- LINKS -->
+
+            <section
+                class="links-container"
+                id="homeLinks"
+            >
+            </section>
+
+
+        </main>
+
+
+        <footer class="footer">
+            By Copyright
+        </footer>
+
+    </section>
+
+
+    <!-- =====================================================
+         ADMIN PAGE
+    ====================================================== -->
+
+    <section
+        class="admin-page"
+        id="adminPage"
+    >
+
+
+        <!-- ADMIN TOPBAR -->
+
+        <header class="topbar">
+
+            <button
+                class="menu-button"
+                onclick="goHome()"
+            >
+                ←
+            </button>
+
+
+            <div class="store-name">
+                Admin Panel
+            </div>
+
+        </header>
+
+
+        <!-- =================================================
+             LOGIN
+        ================================================== -->
+
+        <div
+            class="login-container"
+            id="loginBox"
+        >
+
+            <h2 class="login-title">
+                🔐 Login Admin
+            </h2>
+
+
+            <p class="login-description">
+                Silakan masukkan username dan password
+                untuk mengakses dashboard admin.
+            </p>
+
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    Username
+                </label>
+
+                <input
+                    class="form-input"
+                    type="text"
+                    id="adminLoginUsername"
+                    placeholder="Masukkan username"
+                    autocomplete="username"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label class="form-label">
+                    Password
+                </label>
+
+                <input
+                    class="form-input"
+                    type="password"
+                    id="adminLoginPassword"
+                    placeholder="Masukkan password"
+                    autocomplete="current-password"
+                >
+
+            </div>
+
+
+            <button
+                class="button"
+                style="width:100%;"
+                onclick="loginAdmin()"
+            >
+                Masuk ke Admin
+            </button>
+
+
+            <div
+                class="login-error"
+                id="loginError"
+            ></div>
+
+        </div>
+
+
+        <!-- =================================================
+             DASHBOARD
+        ================================================== -->
+
+        <div
+            class="dashboard"
+            id="dashboard"
+            style="display:none;"
+        >
+
+            <h1 class="dashboard-title">
+                Dashboard Admin
+            </h1>
+
+
+            <!-- ADMIN NAV -->
+
+            <div class="admin-nav">
+
+                <button
+                    class="admin-nav-button active"
+                    onclick="showAdminSection('profileSection', this)"
+                >
+                    👤 Profil
+                </button>
+
+
+                <button
+                    class="admin-nav-button"
+                    onclick="showAdminSection('themeSection', this)"
+                >
+                    🎨 Tema
+                </button>
+
+
+                <button
+                    class="admin-nav-button"
+                    onclick="showAdminSection('linksSection', this)"
+                >
+                    🔗 Link
+                </button>
+
+
+                <button
+                    class="admin-nav-button"
+                    onclick="showAdminSection('previewSection', this)"
+                >
+                    👁️ Halaman Depan
+                </button>
+
+            </div>
+
+
+            <!-- =============================================
+                 PROFIL
+            ============================================== -->
+
+            <div
+                class="admin-section active"
+                id="profileSection"
+            >
+
+                <div class="admin-card">
+
+                    <h2 class="admin-card-title">
+                        👤 Pengaturan Profil
+                    </h2>
+
+
+                    <div class="form-group">
+
+                        <label class="form-label">
+                            Foto Profil
+                        </label>
+
+
+                        <img
+                            class="profile-preview"
+                            id="adminProfilePreview"
+                            src=""
+                            alt="Preview"
+                        >
+
+
+                        <input
+                            class="form-input"
+                            type="file"
+                            id="profileFile"
+                            accept="image/png,image/jpeg,image/webp"
+                            onchange="uploadProfile(event)"
+                        >
+
+
+                        <div class="form-help">
+                            Format JPG, PNG, WEBP. Maksimal 5MB.
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label class="form-label">
+                            Nama
+                        </label>
+
+                        <input
+                            class="form-input"
+                            type="text"
+                            id="profileNameInput"
+                            placeholder="Nama store"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label class="form-label">
+                            Username
+                        </label>
+
+                        <input
+                            class="form-input"
+                            type="text"
+                            id="profileUsernameInput"
+                            placeholder="@username"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label class="form-label">
+                            Bio / Deskripsi
+                        </label>
+
+                        <textarea
+                            class="form-textarea"
+                            id="profileBioInput"
+                            placeholder="Tulis deskripsi tentang Anda atau store..."
+                        ></textarea>
+
+                    </div>
+
+
+                    <button
+                        class="button"
+                        onclick="saveProfile()"
+                    >
+                        Simpan Profil
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 TEMA
+            ============================================== -->
+
+            <div
+                class="admin-section"
+                id="themeSection"
+            >
+
+                <div class="admin-card">
+
+                    <h2 class="admin-card-title">
+                        🎨 Tema / Ubah Warna
+                    </h2>
+
+
+                    <p class="admin-card-description">
+                        Pilih warna utama yang digunakan pada
+                        tombol, garis foto profil, dan elemen
+                        penting lainnya.
+                    </p>
+
+
+                    <div class="form-group">
+
+                        <label class="form-label">
+                            Warna Utama
+                        </label>
+
+
+                        <div class="color-control">
+
+                            <input
+                                class="color-input"
+                                type="color"
+                                id="primaryColor"
+                                onchange="savePrimaryColor()"
+                            >
+
+                            <span
+                                id="colorCode"
+                                style="font-size:13px;"
+                            >
+                                #1677FF
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label class="form-label">
+                            Mode Tampilan
+                        </label>
+
+
+                        <select
+                            class="form-select"
+                            id="adminThemeSelect"
+                            onchange="changeTheme(this.value)"
+                        >
+
+                            <option value="light">
+                                Putih
+                            </option>
+
+                            <option value="dark">
+                                Hitam
+                            </option>
+
+                            <option value="auto">
+                                Otomatis
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 LINKS
+            ============================================== -->
+
+            <div
+                class="admin-section"
+                id="linksSection"
+            >
+
+                <!-- ADD LINK -->
+
+                <div class="admin-card">
+
+                    <h2
+                        class="admin-card-title"
+                        id="linkFormTitle"
+                    >
+                        ➕ Tambah Link
+                    </h2>
+
+
+                    <div class="form-group">
+
+                        <label class="form-label">
+                            Nama Link
+                        </label>
+
+                        <input
+                            class="form-input"
+                            type="text"
+                            id="linkNameInput"
+                            placeholder="Contoh: WhatsApp Saya"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label class="form-label">
+                            URL / Link
+                        </label>
+
+                        <input
+                            class="form-input"
+                            type="url"
+                            id="linkUrlInput"
+                            placeholder="https://..."
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label class="form-label">
+                            Ikon / Foto
+                        </label>
+
+
+                        <input
+                            class="form-input"
+                            type="file"
+                            id="linkIconFile"
+                            accept="image/png,image/jpeg,image/webp"
+                            onchange="uploadLinkIcon(event)"
+                        >
+
+
+                        <div class="form-help">
+                            Format JPG, PNG, WEBP. Maksimal 5MB.
+                        </div>
+
+
+                        <img
+                            class="icon-preview"
+                            id="linkIconPreview"
+                            src=""
+                            alt="Preview Icon"
+                            style="display:none;"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label class="form-label">
+                            Emoji Ikon
+                        </label>
+
+                        <input
+                            class="form-input"
+                            type="text"
+                            id="linkEmojiInput"
+                            placeholder="Contoh: 📱"
+                            maxlength="4"
+                        >
+
+                        <div class="form-help">
+                            Digunakan jika Anda tidak mengupload ikon.
+                        </div>
+
+                    </div>
+
+
+                    <div class="button-row">
+
+                        <button
+                            class="button"
+                            id="saveLinkButton"
+                            onclick="saveLink()"
+                        >
+                            Tambah Link
+                        </button>
+
+
+                        <button
+                            class="button button-secondary"
+                            id="cancelEditButton"
+                            onclick="cancelEdit()"
+                            style="display:none;"
+                        >
+                            Batal
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- LINK LIST -->
+
+                <div class="admin-card">
+
+                    <h2 class="admin-card-title">
+                        🔗 Daftar Link
+                    </h2>
+
+
+                    <div
+                        class="admin-links-list"
+                        id="adminLinksList"
+                    >
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 PREVIEW
+            ============================================== -->
+
+            <div
+                class="admin-section"
+                id="previewSection"
+            >
+
+                <div class="admin-card">
+
+                    <h2 class="admin-card-title">
+                        👁️ Tampilan Halaman Depan
+                    </h2>
+
+
+                    <p class="admin-card-description">
+                        Klik tombol berikut untuk kembali ke
+                        halaman utama dan melihat perubahan.
+                    </p>
+
+
+                    <button
+                        class="button"
+                        onclick="goHome()"
+                    >
+                        Lihat Halaman Depan
+                    </button>
+
+                </div>
+
+
+                <div class="admin-card">
+
+                    <h2 class="admin-card-title">
+                        🔒 Akun Admin
+                    </h2>
+
+
+                    <p class="admin-card-description">
+                        Keluar dari dashboard admin setelah
+                        selesai melakukan perubahan.
+                    </p>
+
+
+                    <button
+                        class="button button-danger"
+                        onclick="logoutAdmin()"
+                    >
+                        Logout
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <script>
+
+        /* =====================================================
+           DEFAULT DATA
+        ===================================================== */
+
+        const DEFAULT_DATA = {
+
+            profile: {
+                name: "My Store",
+                username: "@username",
+                bio: "Selamat datang di halaman media sosial saya.",
+                image: ""
+            },
+
+            primaryColor: "#1677ff",
+
+            links: [
+
+                {
+                    name: "WhatsApp",
+                    url: "https://wa.me/",
+                    emoji: "💬",
+                    icon: ""
+                },
+
+                {
+                    name: "Instagram",
+                    url: "https://instagram.com/",
+                    emoji: "📸",
+                    icon: ""
+                },
+
+                {
+                    name: "TikTok",
+                    url: "https://tiktok.com/",
+                    emoji: "🎵",
+                    icon: ""
+                },
+
+                {
+                    name: "YouTube",
+                    url: "https://youtube.com/",
+                    emoji: "▶️",
+                    icon: ""
+                }
+
+            ]
+
+        };
+
+
+        /* =====================================================
+           ADMIN LOGIN
+           
+           Username dan password TIDAK DITAMPILKAN
+           pada halaman login.
+        ===================================================== */
+
+        const ADMIN_USERNAME = "admin";
+        const ADMIN_PASSWORD = "12345";
+
+
+        /* =====================================================
+           VARIABLES
+        ===================================================== */
+
+        let siteData = loadData();
+
+        let editingLinkIndex = -1;
+
+        let temporaryLinkIcon = "";
+
+
+        /* =====================================================
+           LOAD DATA
+        ===================================================== */
+
+        function loadData() {
+
+            try {
+
+                const saved =
+                    localStorage.getItem("mySocialLinkData");
+
+                if (saved) {
+
+                    const parsed =
+                        JSON.parse(saved);
+
+                    return {
+                        ...DEFAULT_DATA,
+                        ...parsed,
+                        profile: {
+                            ...DEFAULT_DATA.profile,
+                            ...(parsed.profile || {})
+                        },
+                        links: Array.isArray(parsed.links)
+                            ? parsed.links
+                            : DEFAULT_DATA.links
+                    };
+
+                }
+
+            } catch (error) {
+
+                console.log(
+                    "Data tidak dapat dibaca.",
+                    error
+                );
+
+            }
+
+            return JSON.parse(
+                JSON.stringify(DEFAULT_DATA)
+            );
+
+        }
+
+
+        /* =====================================================
+           SAVE DATA
+        ===================================================== */
+
+        function saveData() {
+
+            localStorage.setItem(
+                "mySocialLinkData",
+                JSON.stringify(siteData)
+            );
+
+        }
+
+
+        /* =====================================================
+           DEFAULT PROFILE IMAGE
+        ===================================================== */
+
+        function generateDefaultAvatar() {
+
+            const canvas =
+                document.createElement("canvas");
+
+            canvas.width = 300;
+            canvas.height = 300;
+
+            const ctx =
+                canvas.getContext("2d");
+
+            ctx.fillStyle =
+                siteData.primaryColor;
+
+            ctx.fillRect(
+                0,
+                0,
+                300,
+                300
+            );
+
+            ctx.fillStyle =
+                "#ffffff";
+
+            ctx.font =
+                "bold 90px Arial";
+
+            ctx.textAlign =
+                "center";
+
+            ctx.textBaseline =
+                "middle";
+
+            let letters =
+                siteData.profile.name
+                    .trim()
+                    .substring(0, 2)
+                    .toUpperCase();
+
+            if (!letters) {
+                letters = "MS";
+            }
+
+            ctx.fillText(
+                letters,
+                150,
+                150
+            );
+
+            return canvas.toDataURL(
+                "image/png"
+            );
+
+        }
+
+
+        /* =====================================================
+           GET PROFILE IMAGE
+        ===================================================== */
+
+        function getProfileImage() {
+
+            if (
+                siteData.profile.image &&
+                siteData.profile.image.length > 0
+            ) {
+
+                return siteData.profile.image;
+
+            }
+
+            return generateDefaultAvatar();
+
+        }
+
+
+        /* =====================================================
+           RENDER HOME
+        ===================================================== */
+
+        function renderHome() {
+
+            document.getElementById(
+                "homeStoreName"
+            ).textContent =
+                siteData.profile.name;
+
+
+            document.getElementById(
+                "homeProfileName"
+            ).textContent =
+                siteData.profile.name;
+
+
+            document.getElementById(
+                "homeProfileUsername"
+            ).textContent =
+                siteData.profile.username;
+
+
+            document.getElementById(
+                "homeProfileBio"
+            ).textContent =
+                siteData.profile.bio;
+
+
+            document.getElementById(
+                "homeProfilePhoto"
+            ).src =
+                getProfileImage();
+
+
+            renderHomeLinks();
+
+        }
+
+
+        /* =====================================================
+           RENDER HOME LINKS
+        ===================================================== */
+
+        function renderHomeLinks() {
+
+            const container =
+                document.getElementById(
+                    "homeLinks"
+                );
+
+            container.innerHTML = "";
+
+
+            if (
+                !siteData.links ||
+                siteData.links.length === 0
+            ) {
+
+                container.innerHTML = `
+                    <div class="empty-links">
+                        Belum ada link media sosial.
+                    </div>
+                `;
+
+                return;
+
+            }
+
+
+            siteData.links.forEach(
+                function(link) {
+
+                    const element =
+                        document.createElement("a");
+
+                    element.className =
+                        "social-link";
+
+                    element.href =
+                        link.url;
+
+                    element.target =
+                        "_blank";
+
+                    element.rel =
+                        "noopener noreferrer";
+
+
+                    let iconHTML = "";
+
+
+                    if (link.icon) {
+
+                        iconHTML = `
+                            <img
+                                class="social-icon"
+                                src="${link.icon}"
+                                alt=""
+                            >
+                        `;
+
+                    } else {
+
+                        iconHTML = `
+                            <div class="social-icon">
+                                ${link.emoji || "🔗"}
+                            </div>
+                        `;
+
+                    }
+
+
+                    element.innerHTML = `
+
+                        ${iconHTML}
+
+                        <div class="social-content">
+
+                            <div class="social-name">
+                                ${escapeHTML(link.name)}
+                            </div>
+
+                            <div class="social-description">
+                                Klik untuk membuka
+                            </div>
+
+                        </div>
+
+                        <div class="social-arrow">
+                            →
+                        </div>
+
+                    `;
+
+
+                    container.appendChild(
+                        element
+                    );
+
+                }
+            );
+
+        }
+
+
+        /* =====================================================
+           ESCAPE HTML
+        ===================================================== */
+
+        function escapeHTML(value) {
+
+            const div =
+                document.createElement("div");
+
+            div.textContent =
+                value || "";
+
+            return div.innerHTML;
+
+        }
+
+
+        /* =====================================================
+           SIDEBAR
+        ===================================================== */
+
+        function openSidebar() {
+
+            document
+                .getElementById("sidebar")
+                .classList.add("active");
+
+            document
+                .getElementById("sidebarOverlay")
+                .classList.add("active");
+
+        }
+
+
+        function closeSidebar() {
+
+            document
+                .getElementById("sidebar")
+                .classList.remove("active");
+
+            document
+                .getElementById("sidebarOverlay")
+                .classList.remove("active");
+
+        }
+
+
+        /* =====================================================
+           GO HOME
+        ===================================================== */
+
+        function goHome() {
+
+            closeSidebar();
+
+            document
+                .getElementById("homePage")
+                .classList.remove("hidden");
+
+            document
+                .getElementById("adminPage")
+                .classList.remove("active");
+
+            renderHome();
+
+        }
+
+
+        /* =====================================================
+           OPEN ADMIN
+        ===================================================== */
+
+        function openAdmin() {
+
+            closeSidebar();
+
+            document
+                .getElementById("homePage")
+                .classList.add("hidden");
+
+            document
+                .getElementById("adminPage")
+                .classList.add("active");
+
+        }
+
+
+        /* =====================================================
+           ADMIN LOGIN
+        ===================================================== */
+
+        function loginAdmin() {
+
+            const username =
+                document
+                    .getElementById(
+                        "adminLoginUsername"
+                    )
+                    .value
+                    .trim();
+
+
+            const password =
+                document
+                    .getElementById(
+                        "adminLoginPassword"
+                    )
+                    .value;
+
+
+            const error =
+                document.getElementById(
+                    "loginError"
+                );
+
+
+            if (
+                username === ADMIN_USERNAME &&
+                password === ADMIN_PASSWORD
+            ) {
+
+                error.textContent = "";
+
+
+                document.getElementById(
+                    "loginBox"
+                ).style.display =
+                    "none";
+
+
+                document.getElementById(
+                    "dashboard"
+                ).style.display =
+                    "block";
+
+
+                loadAdminForm();
+
+
+            } else {
+
+                error.textContent =
+                    "Username atau password salah.";
+
+            }
+
+        }
+
+
+        /* =====================================================
+           LOGOUT
+        ===================================================== */
+
+        function logoutAdmin() {
+
+            document.getElementById(
+                "dashboard"
+            ).style.display =
+                "none";
+
+
+            document.getElementById(
+                "loginBox"
+            ).style.display =
+                "block";
+
+
+            document.getElementById(
+                "adminLoginUsername"
+            ).value = "";
+
+
+            document.getElementById(
+                "adminLoginPassword"
+            ).value = "";
+
+
+            document.getElementById(
+                "loginError"
+            ).textContent = "";
+
+
+            openAdmin();
+
+        }
+
+
+        /* =====================================================
+           ADMIN FORM
+        ===================================================== */
+
+        function loadAdminForm() {
+
+            document.getElementById(
+                "adminProfilePreview"
+            ).src =
+                getProfileImage();
+
+
+            document.getElementById(
+                "profileNameInput"
+            ).value =
+                siteData.profile.name;
+
+
+            document.getElementById(
+                "profileUsernameInput"
+            ).value =
+                siteData.profile.username;
+
+
+            document.getElementById(
+                "profileBioInput"
+            ).value =
+                siteData.profile.bio;
+
+
+            document.getElementById(
+                "primaryColor"
+            ).value =
+                siteData.primaryColor;
+
+
+            document.getElementById(
+                "colorCode"
+            ).textContent =
+                siteData.primaryColor.toUpperCase();
+
+
+            const savedTheme =
+                localStorage.getItem(
+                    "mySocialTheme"
+                ) || "auto";
+
+
+            document.getElementById(
+                "adminThemeSelect"
+            ).value =
+                savedTheme;
+
+
+            renderAdminLinks();
+
+        }
+
+
+        /* =====================================================
+           SAVE PROFILE
+        ===================================================== */
+
+        function saveProfile() {
+
+            const name =
+                document
+                    .getElementById(
+                        "profileNameInput"
+                    )
+                    .value
+                    .trim();
+
+
+            const username =
+                document
+                    .getElementById(
+                        "profileUsernameInput"
+                    )
+                    .value
+                    .trim();
+
+
+            const bio =
+                document
+                    .getElementById(
+                        "profileBioInput"
+                    )
+                    .value
+                    .trim();
+
+
+            siteData.profile.name =
+                name || "My Store";
+
+
+            siteData.profile.username =
+                username || "@username";
+
+
+            siteData.profile.bio =
+                bio ||
+                "Selamat datang di halaman media sosial saya.";
+
+
+            saveData();
+
+            renderHome();
+
+            document.getElementById(
+                "adminProfilePreview"
+            ).src =
+                getProfileImage();
+
+
+            alert(
+                "Profil berhasil disimpan."
+            );
+
+        }
+
+
+        /* =====================================================
+           UPLOAD PROFILE
+        ===================================================== */
+
+        function uploadProfile(event) {
+
+            const file =
+                event.target.files[0];
+
+            if (!file) {
+                return;
+            }
+
+
+            if (
+                file.size >
+                5 * 1024 * 1024
+            ) {
+
+                alert(
+                    "Ukuran foto maksimal 5MB."
+                );
+
+                event.target.value = "";
+
+                return;
+
+            }
+
+
+            const reader =
+                new FileReader();
+
+
+            reader.onload =
+                function(e) {
+
+                    siteData.profile.image =
+                        e.target.result;
+
+                    saveData();
+
+                    document.getElementById(
+                        "adminProfilePreview"
+                    ).src =
+                        e.target.result;
+
+                    renderHome();
+
+                };
+
+
+            reader.readAsDataURL(file);
+
+        }
+
+
+        /* =====================================================
+           SAVE PRIMARY COLOR
+        ===================================================== */
+
+        function savePrimaryColor() {
+
+            const color =
+                document.getElementById(
+                    "primaryColor"
+                ).value;
+
+
+            siteData.primaryColor =
+                color;
+
+
+            document.documentElement
+                .style.setProperty(
+                    "--primary",
+                    color
+                );
+
+
+            document.getElementById(
+                "colorCode"
+            ).textContent =
+                color.toUpperCase();
+
+
+            saveData();
+
+            renderHome();
+
+        }
+
+
+        /* =====================================================
+           THEME
+        ===================================================== */
+
+        function changeTheme(theme) {
+
+            localStorage.setItem(
+                "mySocialTheme",
+                theme
+            );
+
+
+            applyTheme(theme);
+
+
+            const select =
+                document.getElementById(
+                    "adminThemeSelect"
+                );
+
+
+            if (select) {
+                select.value = theme;
+            }
+
+        }
+
+
+        function applyTheme(theme) {
+
+            if (theme === "dark") {
+
+                document.body.classList.add(
+                    "dark"
+                );
+
+                return;
+
+            }
+
+
+            if (theme === "light") {
+
+                document.body.classList.remove(
+                    "dark"
+                );
+
+                return;
+
+            }
+
+
+            const systemDark =
+                window.matchMedia(
+                    "(prefers-color-scheme: dark)"
+                ).matches;
+
+
+            document.body.classList.toggle(
+                "dark",
+                systemDark
+            );
+
+        }
+
+
+        /* =====================================================
+           SYSTEM THEME CHANGE
+        ===================================================== */
+
+        window
+            .matchMedia(
+                "(prefers-color-scheme: dark)"
+            )
+            .addEventListener(
+                "change",
+                function() {
+
+                    const theme =
+                        localStorage.getItem(
+                            "mySocialTheme"
+                        ) || "auto";
+
+
+                    if (theme === "auto") {
+                        applyTheme("auto");
+                    }
+
+                }
+            );
+
+
+        /* =====================================================
+           UPLOAD LINK ICON
+        ===================================================== */
+
+        function uploadLinkIcon(event) {
+
+            const file =
+                event.target.files[0];
+
+            if (!file) {
+                return;
+            }
+
+
+            if (
+                file.size >
+                5 * 1024 * 1024
+            ) {
+
+                alert(
+                    "Ukuran ikon maksimal 5MB."
+                );
+
+                event.target.value = "";
+
+                return;
+
+            }
+
+
+            const reader =
+                new FileReader();
+
+
+            reader.onload =
+                function(e) {
+
+                    temporaryLinkIcon =
+                        e.target.result;
+
+
+                    const preview =
+                        document.getElementById(
+                            "linkIconPreview"
+                        );
+
+
+                    preview.src =
+                        temporaryLinkIcon;
+
+
+                    preview.style.display =
+                        "block";
+
+                };
+
+
+            reader.readAsDataURL(file);
+
+        }
+
+
+        /* =====================================================
+           SAVE LINK
+        ===================================================== */
+
+        function saveLink() {
+
+            const name =
+                document
+                    .getElementById(
+                        "linkNameInput"
+                    )
+                    .value
+                    .trim();
+
+
+            const url =
+                document
+                    .getElementById(
+                        "linkUrlInput"
+                    )
+                    .value
+                    .trim();
+
+
+            const emoji =
+                document
+                    .getElementById(
+                        "linkEmojiInput"
+                    )
+                    .value
+                    .trim();
+
+
+            if (!name) {
+
+                alert(
+                    "Nama link wajib diisi."
+                );
+
+                return;
+
+            }
+
+
+            if (!url) {
+
+                alert(
+                    "URL link wajib diisi."
+                );
+
+                return;
+
+            }
+
+
+            const linkData = {
+
+                name: name,
+
+                url: url,
+
+                emoji: emoji || "🔗",
+
+                icon: temporaryLinkIcon || ""
+
+            };
+
+
+            if (editingLinkIndex === -1) {
+
+                siteData.links.push(
+                    linkData
+                );
+
+
+                alert(
+                    "Link berhasil ditambahkan."
+                );
+
+            } else {
+
+                siteData.links[
+                    editingLinkIndex
+                ] = linkData;
+
+
+                alert(
+                    "Link berhasil diperbarui."
+                );
+
+            }
+
+
+            saveData();
+
+            renderHome();
+
+            renderAdminLinks();
+
+            cancelEdit();
+
+        }
+
+
+        /* =====================================================
+           RENDER ADMIN LINKS
+        ===================================================== */
+
+        function renderAdminLinks() {
+
+            const container =
+                document.getElementById(
+                    "adminLinksList"
+                );
+
+
+            container.innerHTML = "";
+
+
+            if (
+                !siteData.links ||
+                siteData.links.length === 0
+            ) {
+
+                container.innerHTML = `
+                    <div class="empty-links">
+                        Belum ada link.
+                    </div>
+                `;
+
+                return;
+
+            }
+
+
+            siteData.links.forEach(
+                function(link, index) {
+
+                    const item =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    item.className =
+                        "admin-link";
+
+
+                    let iconHTML;
+
+
+                    if (link.icon) {
+
+                        iconHTML = `
+                            <img
+                                class="admin-link-icon"
+                                src="${link.icon}"
+                                alt=""
+                            >
+                        `;
+
+                    } else {
+
+                        iconHTML = `
+                            <div class="admin-link-icon">
+                                ${link.emoji || "🔗"}
+                            </div>
+                        `;
+
+                    }
+
+
+                    item.innerHTML = `
+
+                        ${iconHTML}
+
+                        <div class="admin-link-content">
+
+                            <div class="admin-link-name">
+                                ${escapeHTML(link.name)}
+                            </div>
+
+                            <div class="admin-link-url">
+                                ${escapeHTML(link.url)}
+                            </div>
+
+                        </div>
+
+
+                        <div class="admin-link-actions">
+
+                            <button
+                                class="button button-secondary button-small"
+                                onclick="editLink(${index})"
+                            >
+                                Edit
+                            </button>
+
+
+                            <button
+                                class="button button-danger button-small"
+                                onclick="deleteLink(${index})"
+                            >
+                                Hapus
+                            </button>
+
+                        </div>
+
+                    `;
+
+
+                    container.appendChild(
+                        item
+                    );
+
+                }
+            );
+
+        }
+
+
+        /* =====================================================
+           EDIT LINK
+        ===================================================== */
+
+        function editLink(index) {
+
+            const link =
+                siteData.links[index];
+
+
+            editingLinkIndex =
+                index;
+
+
+            document.getElementById(
+                "linkFormTitle"
+            ).textContent =
+                "✏️ Edit Link";
+
+
+            document.getElementById(
+                "linkNameInput"
+            ).value =
+                link.name;
+
+
+            document.getElementById(
+                "linkUrlInput"
+            ).value =
+                link.url;
+
+
+            document.getElementById(
+                "linkEmojiInput"
+            ).value =
+                link.emoji || "";
+
+
+            temporaryLinkIcon =
+                link.icon || "";
+
+
+            const preview =
+                document.getElementById(
+                    "linkIconPreview"
+                );
+
+
+            if (link.icon) {
+
+                preview.src =
+                    link.icon;
+
+                preview.style.display =
+                    "block";
+
+            } else {
+
+                preview.src = "";
+
+                preview.style.display =
+                    "none";
+
+            }
+
+
+            document.getElementById(
+                "saveLinkButton"
+            ).textContent =
+                "Simpan Perubahan";
+
+
+            document.getElementById(
+                "cancelEditButton"
+            ).style.display =
+                "inline-block";
+
+
+            showAdminSection(
+                "linksSection",
+                document.querySelector(
+                    '.admin-nav-button:nth-child(3)'
+                )
+            );
+
+
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
+
+        }
+
+
+        /* =====================================================
+           DELETE LINK
+        ===================================================== */
+
+        function deleteLink(index) {
+
+            const confirmDelete =
+                confirm(
+                    "Apakah Anda yakin ingin menghapus link ini?"
+                );
+
+
+            if (!confirmDelete) {
+                return;
+            }
+
+
+            siteData.links.splice(
+                index,
+                1
+            );
+
+
+            saveData();
+
+            renderHome();
+
+            renderAdminLinks();
+
+        }
+
+
+        /* =====================================================
+           CANCEL EDIT
+        ===================================================== */
+
+        function cancelEdit() {
+
+            editingLinkIndex =
+                -1;
+
+
+            temporaryLinkIcon =
+                "";
+
+
+            document.getElementById(
+                "linkFormTitle"
+            ).textContent =
+                "➕ Tambah Link";
+
+
+            document.getElementById(
+                "linkNameInput"
+            ).value = "";
+
+
+            document.getElementById(
+                "linkUrlInput"
+            ).value = "";
+
+
+            document.getElementById(
+                "linkEmojiInput"
+            ).value = "";
+
+
+            document.getElementById(
+                "linkIconFile"
+            ).value = "";
+
+
+            const preview =
+                document.getElementById(
+                    "linkIconPreview"
+                );
+
+
+            preview.src = "";
+
+            preview.style.display =
+                "none";
+
+
+            document.getElementById(
+                "saveLinkButton"
+            ).textContent =
+                "Tambah Link";
+
+
+            document.getElementById(
+                "cancelEditButton"
+            ).style.display =
+                "none";
+
+        }
+
+
+        /* =====================================================
+           ADMIN SECTIONS
+        ===================================================== */
+
+        function showAdminSection(
+            sectionId,
+            clickedButton
+        ) {
+
+            const sections =
+                document.querySelectorAll(
+                    ".admin-section"
+                );
+
+
+            sections.forEach(
+                function(section) {
+
+                    section.classList.remove(
+                        "active"
+                    );
+
+                }
+            );
+
+
+            const buttons =
+                document.querySelectorAll(
+                    ".admin-nav-button"
+                );
+
+
+            buttons.forEach(
+                function(button) {
+
+                    button.classList.remove(
+                        "active"
+                    );
+
+                }
+            );
+
+
+            document
+                .getElementById(sectionId)
+                .classList.add("active");
+
+
+            if (clickedButton) {
+
+                clickedButton.classList.add(
+                    "active"
+                );
+
+            }
+
+        }
+
+
+        /* =====================================================
+           INITIALIZATION
+        ===================================================== */
+
+        function initialize() {
+
+            document.documentElement
+                .style.setProperty(
+                    "--primary",
+                    siteData.primaryColor
+                );
+
+
+            const savedTheme =
+                localStorage.getItem(
+                    "mySocialTheme"
+                ) || "auto";
+
+
+            applyTheme(savedTheme);
+
+
+            renderHome();
+
+        }
+
+
+        initialize();
+
+    </script>
+
+</body>
+</html>
